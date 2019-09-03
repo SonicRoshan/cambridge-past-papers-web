@@ -1,0 +1,83 @@
+{% extends "header.html" %}
+{% block header %}
+    <title>Download Past Papers</title>
+    <style>
+        .background {
+            background: #{{ background_color }};
+        }
+        .progress.custom::-webkit-progress-value {
+            background-color: #{{ background_color }};
+        }
+
+        .progress.custom::-moz-progress-bar {
+            background-color: #{{ background_color }};
+        }
+
+        .progress.custom::-ms-fill {
+            background-color: #{{ background_color }};
+        }
+
+        .progress.custom:indeterminate {
+            background-image: linear-gradient(to right, #{{ background_color }} 30%, #dbdbdb 30%);
+        }
+    </style>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script>
+        var source = new EventSource("{{ progress_url }}");
+        source.onmessage = function(event) {
+            if(String(event.data).charAt(0) != "/") {
+                $('.progress').attr('value', event.data);
+            } else {
+                window.location.href = String(event.data)
+                source.close()
+            }
+        }
+
+        source.onerror = function(error) {
+            source.close()
+            $("#modal").toggleClass('is-active');
+            $('html').toggleClass('is-clipped');
+        }
+
+    </script>
+{% endblock %}
+{% block body %}
+    <section class="hero background center is-fullheight">
+        <div class="card" style="margin: 4rem; border-radius: 1rem">
+            <div style="margin: 2rem">
+                <center>
+                    <h1 class="is-size-1 has-text-weight-bold">Downloading ...</h1>
+                    <br>
+                    <p>This Will Take Some Time, So Go Outside And Play.</p>
+                    <br>
+                    <div style="margin: 2rem">
+                        <progress class="progress custom"  max="100"></progress>
+                    </div> 
+                </center>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal" id="modal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="card">
+                <div style="margin: 2rem">
+                    <center>
+                            <h1 class="is-size-1 has-text-weight-bold">Oops Error Occured</h1>
+                            <br>
+                            <p>You may have added invalid data such as invalid subject code or invalid start and end year.</p>
+                            <br>
+                            <p class="control has-text-centered">
+                                <button onclick="window.location.href = '/'" id="close" class="button is-success">
+                                Go Back
+                                </button>
+                            </p>
+                            <br>
+                    </center>
+                </div>
+            </div>
+        </div>
+        <!--<button class="modal-close is-large" aria-label="close"></button>-->
+    </div>
+{% endblock %}

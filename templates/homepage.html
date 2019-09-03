@@ -1,0 +1,93 @@
+{% extends "header.html" %}
+
+{% block header %}
+<title>IGCE Bundle Past Papers Downloader</title>
+<style>
+    .background {
+        background: linear-gradient({{ angle }}deg, #{{ background_color[0] }}, #{{ background_color[1] }} 45%, #{{ background_color[0] }} 45%) #{{ background_color[0] }};
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+    <section class="hero background center is-fullheight">
+        <div class="hero-head center" style="padding: 0.8rem">
+                <div class="card" style="padding: 0.8rem;">
+                    <center>
+                        <h4 class="is-size-4 has-text-weight-bold" style="font-family: Pacifico;">
+                            IGCE Past Paper Downloader
+                        </h4>
+                    </center>
+                </div>
+        </div>
+        <div class="hero-body" style="padding: 0.8rem">
+            <div class="container has-text-centered">
+                <div class="card has-text-centered" style="border-radius: 1rem">
+                    <form style="padding: 0.5rem" method="POST" action="">
+                        <div class="field">
+                            <label class="label">Subject Code</label>
+                            <div class="control">
+                                <center>
+                                    <input class="input center" type="text" name="subject_code" style="width: 30%" placeholder="e.g 0625 For Physics">
+                                </center>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Start Year</label>
+                            <div class="control">
+                                <center>
+                                    <input class="input center" type="text" name="start_year" style="width: 30%" placeholder="e.g 2014">
+                                </center>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">End Year</label>
+                            <div class="control">
+                                <center>
+                                    <input class="input center" type="text" name="end_year" style="width: 30%" placeholder="e.g 2019">
+                                </center>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Filters</label>
+                            <h6>Type in papers codes that you dont want to download.</h6>
+                            <h6>For example you can type in 22 23 24 in summer filter.</h6>
+                            <h6>Therefore, papers with this codes wont be downloaded for summer series.</h6>
+                            <br>
+                            <div class="control">
+                                <center>
+                                    <h6>Summer Filter (Seperated By Spaces)</h6>
+                                    <input class="input" type="text" name="summer_filter" style="width: 30%" placeholder="e.g 22 23 24">
+                                
+                                    <h6>Feb-March Filter (Seperated By Spaces)</h6>
+                                    <input class="input" type="text" name="feb_march_filter" style="width: 30%" placeholder="e.g 2019">
+                            
+                                    <h6>Winter Filter (Seperated By Spaces)</h6>
+                                    <input class="input" type="text" name="winter_filter" style="width: 30%" placeholder="e.g 2019">
+                                </center>
+                            </div>
+                            <div class="field" style="padding-top: 0.5rem">
+                                <center>
+                                    <p class="control has-text-centered">
+                                        <button class="button is-success">
+                                        Submit
+                                        </button>
+                                    </p>
+                                </center>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="hero-foot center" style="padding: 0.8rem;">
+            <div class="card" style="padding: 0.8rem;">
+                <center>
+                    <h4 class="is-size-4 has-text-weight-bold" style="font-family: Manjari">
+                        Made With <i class="material-icons has-text-danger">favorite</i> By Roshan Mehta
+                    </h4>
+                </center>
+            </div>
+        </div>
+    </section>
+{% endblock %}
