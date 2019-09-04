@@ -1,2 +1,3 @@
 Flask
-PyPDF2
+PyPDF2]
+waitress
