@@ -35,6 +35,7 @@
 
         source.onerror = function(error) {
             source.close()
+            $("error").contents = error
             $("#modal").toggleClass('is-active');
             $('html').toggleClass('is-clipped');
         }
@@ -67,6 +68,8 @@
                             <h1 class="is-size-1 has-text-weight-bold">Oops Error Occured</h1>
                             <br>
                             <p>You may have added invalid data such as invalid subject code or invalid start and end year.</p>
+                            <br>
+                            <p id="error"></p>
                             <br>
                             <p class="control has-text-centered">
                                 <button onclick="window.location.href = '/'" id="close" class="button is-success">
