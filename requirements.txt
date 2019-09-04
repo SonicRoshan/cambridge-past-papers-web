@@ -3,3 +3,4 @@ PyPDF2
 gunicorn
 requests
 beautifulsoup4
+lxml
