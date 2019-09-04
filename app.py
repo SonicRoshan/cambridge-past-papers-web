@@ -5,7 +5,7 @@ import shutil
 import zipfile
 import requests
 from flask import Flask, request, Response, render_template, send_file, redirect
-import papers_downloader
+import paper_downloader
 import config
 from task_queue import Queue
 
