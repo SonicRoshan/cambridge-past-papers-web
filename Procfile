@@ -1,1 +1,1 @@
-web gunicorn --port=$PORT app:AP
+web gunicorn app:AP
