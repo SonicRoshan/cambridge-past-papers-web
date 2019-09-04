@@ -35,7 +35,7 @@
 
         source.onerror = function(error) {
             source.close()
-            $("error").contents = error
+            $("error").contents = error;
             $("#modal").toggleClass('is-active');
             $('html').toggleClass('is-clipped');
         }
