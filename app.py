@@ -134,9 +134,12 @@ def progress():
     paper_downloader.mkdir(paper_downloader.config.DATA_FOLDER)
 
     for task_id in queue.find_expired_tasks():
-        shutil.rmtree("{}/{}".format(paper_downloader.config.DATA_FOLDER, task_id),
-                      ignore_errors=True)
-        os.remove("{}/{}.zip".format(paper_downloader.config.DATA_FOLDER, task_id))
+        try:
+            shutil.rmtree("{}/{}".format(paper_downloader.config.DATA_FOLDER, task_id),
+                        ignore_errors=True)
+            os.remove("{}/{}.zip".format(paper_downloader.config.DATA_FOLDER, task_id))
+        except FileNotFoundError:
+            pass
 
     args = filter_args(request.args)
     paper_code = args[config.SUBJECT_CODE_ARG]
