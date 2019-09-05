@@ -31,8 +31,11 @@ def zipdir(task_id, filename):
     os.chdir("..")
     os.chdir("..")
 
-def download_papers(task_id, years_urls, to_filter):
+def download_papers(task_id, years_urls, to_filter, error=""):
     """Download all papers from a dict of paper urls (modified version)"""
+    if error != "":
+        yield "data:error\n\n"
+        return
     papers_done = 0
     papers_urls = {paper_name : paper_url
                    for year_url in years_urls
@@ -129,36 +132,43 @@ def get_zip(task_id):
 @APP.route("/progress")
 def progress():
     """Where papers will be downloaded"""
-    queue = Queue()
+    exception = ""
+    try:
+        queue = Queue()
 
-    paper_downloader.mkdir(paper_downloader.config.DATA_FOLDER)
+        paper_downloader.mkdir(paper_downloader.config.DATA_FOLDER)
 
-    for task_id in queue.find_expired_tasks():
-        try:
-            shutil.rmtree("{}/{}".format(paper_downloader.config.DATA_FOLDER, task_id),
-                                ignore_errors=True)
-            os.remove("{}/{}.zip".format(paper_downloader.config.DATA_FOLDER, task_id))
-        except FileNotFoundError:
-            pass
+        for task_id in queue.find_expired_tasks():
+            try:
+                shutil.rmtree("{}/{}".format(paper_downloader.config.DATA_FOLDER, task_id),
+                              ignore_errors=True)
+                os.remove("{}/{}.zip".format(paper_downloader.config.DATA_FOLDER, task_id))
+            except FileNotFoundError:
+                pass
 
-    args = filter_args(request.args)
-    paper_code = args[config.SUBJECT_CODE_ARG]
-    start_year = int(args[config.START_YEAR_ARG])
-    end_year = int(args[config.END_YEAR_ARG])
+        args = filter_args(request.args)
+        paper_code = args[config.SUBJECT_CODE_ARG]
+        start_year = int(args[config.START_YEAR_ARG])
+        end_year = int(args[config.END_YEAR_ARG])
 
-    to_filter = {key : args[key].split(",")
-                 for key in ['s', 'm', 'w']}
+        to_filter = {key : args[key].split(",")
+                    for key in ['s', 'm', 'w']}
 
 
-    subject_url = paper_downloader.get_subject_url(paper_code)
-    years_urls = paper_downloader.get_each_years_url(subject_url, start_year, end_year)
+        subject_url = paper_downloader.get_subject_url(paper_code)
+        years_urls = paper_downloader.get_each_years_url(subject_url, start_year, end_year)
 
-    task_id = queue.add_task()
-    paper_downloader.mkdir("{}/{}".format(paper_downloader.config.DATA_FOLDER, task_id))
+        task_id = queue.add_task()
+        paper_downloader.mkdir("{}/{}".format(paper_downloader.config.DATA_FOLDER, task_id))
+    except Exception as error:
+        exception = error
+        task_id = ""
+        years_urls = [""]
+        to_filter = [""]
 
     return Response(
-        download_papers(task_id, years_urls, to_filter),
-        mimetype='text/event-stream'
+        download_papers(task_id, years_urls, to_filter, error=exception),
+        mimetype='text/event-stream',
     )
 
 if __name__ == "__main__":
