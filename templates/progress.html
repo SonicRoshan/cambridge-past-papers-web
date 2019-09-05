@@ -25,13 +25,12 @@
     <script>
         var source = new EventSource("{{ progress_url }}");
         source.onmessage = function(event) {
-            if(String(event.data) === "error") {
+            if(String(event.data) == "error") {
                 source.close()
                 $("#modal").toggleClass('is-active');
                 $('html').toggleClass('is-clipped');
             } else if(String(event.data).charAt(0) != "/") {
                 $('.progress').attr('value', event.data);
-                
             }else {
                 window.location.href = String(event.data)
                 source.close()

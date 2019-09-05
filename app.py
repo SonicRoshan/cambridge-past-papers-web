@@ -1,5 +1,6 @@
 """Website where people can easily download IGCSE Past Papers"""
 import os
+import sys
 import random
 import shutil
 import zipfile
@@ -161,6 +162,7 @@ def progress():
         task_id = queue.add_task()
         paper_downloader.mkdir("{}/{}".format(paper_downloader.config.DATA_FOLDER, task_id))
     except Exception as error:
+        print(error, file=sys.stderr)
         exception = error
         task_id = ""
         years_urls = [""]
