@@ -34,9 +34,9 @@
         }
 
         source.onerror = function(error) {
-            source.close()
-            $("#modal").toggleClass('is-active');
-            $('html').toggleClass('is-clipped');
+            alert(error.data);
+            //$("#modal").toggleClass('is-active');
+            //$('html').toggleClass('is-clipped');
         }
 
     </script>

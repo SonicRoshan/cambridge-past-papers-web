@@ -136,7 +136,7 @@ def progress():
     for task_id in queue.find_expired_tasks():
         try:
             shutil.rmtree("{}/{}".format(paper_downloader.config.DATA_FOLDER, task_id),
-                        ignore_errors=True)
+                                ignore_errors=True)
             os.remove("{}/{}.zip".format(paper_downloader.config.DATA_FOLDER, task_id))
         except FileNotFoundError:
             pass
