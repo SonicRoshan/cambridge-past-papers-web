@@ -56,9 +56,11 @@ def fetch(data):
     else:
         folder = paper_downloader.config.MARK_SCHEME_FOLDER
 
-    name = "{}/{}/{}/{}.pdf".format(paper_downloader.config.DATA_FOLDER,
+    paper_year = paper_name.split("_")[1][1:3]
+    name = "{}/{}/{}/{}_{}.pdf".format(paper_downloader.config.DATA_FOLDER,
                                     task_id,
                                     folder,
+                                    paper_year,
                                     paper_name)
 
     name_temp = name + "_temp.pdf"
