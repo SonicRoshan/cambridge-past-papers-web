@@ -4,6 +4,7 @@ import sys
 import random
 import shutil
 import zipfile
+from multiprocessing.pool import ThreadPool
 import requests
 from flask import Flask, request, Response, render_template, send_file, redirect
 import paper_downloader
@@ -32,19 +33,10 @@ def zipdir(task_id, filename):
     os.chdir("..")
     os.chdir("..")
 
-def download_papers(task_id, years_urls, to_filter, error=""):
-    """Download all papers from a dict of paper urls (modified version)"""
-    if error != "":
-        yield "data:error\n\n"
-        return
-    papers_done = 0
-    papers_urls = {paper_name : paper_url
-                   for year_url in years_urls
-                   for paper_name, paper_url in paper_downloader.filter_papers(
-                       paper_downloader.get_papers_urls(year_url),
-                       to_filter).items()
-                   }
 
+def fetch(data):
+    """Fetches a paper and downloads it"""
+    paper_name, paper_url, task_id = data
     question_papers_folder = "{}/{}/{}".format(
         paper_downloader.config.DATA_FOLDER,
         task_id,
@@ -58,41 +50,57 @@ def download_papers(task_id, years_urls, to_filter, error=""):
         paper_downloader.config.MARK_SCHEME_FOLDER
     ))
 
-    num = len(os.listdir(question_papers_folder))
+    _, paper_type = paper_downloader.get_paper_data(paper_name)
+    if paper_type != "ms":
+        folder = paper_downloader.config.QUESTION_PAPERS_FOLDER
+    else:
+        folder = paper_downloader.config.MARK_SCHEME_FOLDER
 
-    for paper_name, paper_url in papers_urls.items():
-        _, paper_type = paper_downloader.get_paper_data(paper_name)
+    name = "{}/{}/{}/{}.pdf".format(paper_downloader.config.DATA_FOLDER,
+                                    task_id,
+                                    folder,
+                                    paper_name)
 
+    name_temp = name + "_temp.pdf"
 
-        if paper_type != "ms":
-            folder = paper_downloader.config.QUESTION_PAPERS_FOLDER
-        else:
-            folder = paper_downloader.config.MARK_SCHEME_FOLDER
+    data = requests.get(paper_url, headers=paper_downloader.config.HEADERS).content
+    with open(name_temp, "wb") as file:
+        file.write(data)
 
-        data = requests.get(paper_url, headers=paper_downloader.config.HEADERS).content
+    paper_downloader.remove_blank_pages(name_temp, name)
+    os.remove(name_temp)
+    #yield "data:" + str((papers_done/len(papers_urls))*100) + "\n\n"
 
-        name = "{}/{}/{}/{}_{}.pdf".format(paper_downloader.config.DATA_FOLDER,
-                                           task_id,
-                                           folder,
-                                           num,
-                                           paper_name)
+def download_papers(task_id, years_urls, to_filter, error=""):
+    """Download all papers from a dict of paper urls (modified version)"""
+    if error != "":
+        yield "data:error\n\n"
+        return
 
-        with open(name+"_temp", "wb") as file:
-            file.write(data)
+    try:
 
-        paper_downloader.remove_blank_pages(name+"_temp", name)
-        os.remove(name+"_temp")
-        papers_done += 1
-        yield "data:" + str((papers_done/len(papers_urls))*100) + "\n\n"
+        papers_done = 0
+        papers_urls = [(paper_name, paper_url, task_id)
+                       for year_url in years_urls
+                       for paper_name, paper_url in paper_downloader.filter_papers(
+                           paper_downloader.get_papers_urls(year_url),
+                           to_filter).items()
+                      ]
 
-    #zipdir(task_id,
-           #"{}/{}.zip".format(paper_downloader.config.DATA_FOLDER, task_id))
+        pool = ThreadPool(10)
+        for _ in pool.imap_unordered(fetch, papers_urls):
+            papers_done += 1
+            yield "data:" + str((papers_done/len(papers_urls))*100) + "\n\n"
 
-    shutil.make_archive("{}/{}".format(paper_downloader.config.DATA_FOLDER, task_id),
-                        'zip',
-                        "{}/{}".format(paper_downloader.config.DATA_FOLDER, task_id))
+        shutil.make_archive("{}/{}".format(paper_downloader.config.DATA_FOLDER, task_id),
+                            'zip',
+                            "{}/{}".format(paper_downloader.config.DATA_FOLDER, task_id))
 
-    yield "data:/get_zip/{}/paper_bundle.zip\n\n".format(task_id)
+        yield "data:/get_zip/{}/paper_bundle.zip\n\n".format(task_id)
+    except Exception as exception:
+        print("error ", exception, file=sys.stderr)
+        yield "data:error\n\n"
+        return
 
 @APP.route("/", methods=["POST", "GET"])
 def homepage():
@@ -153,7 +161,7 @@ def progress():
         end_year = int(args[config.END_YEAR_ARG])
 
         to_filter = {key : args[key].split(",")
-                    for key in ['s', 'm', 'w']}
+                     for key in ['s', 'm', 'w']}
 
 
         subject_url = paper_downloader.get_subject_url(paper_code)
