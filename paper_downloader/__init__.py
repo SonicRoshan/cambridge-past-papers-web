@@ -116,12 +116,15 @@ def get_papers_urls(year_url):
     papers_urls = {}
     html_data = requests.get(year_url, headers=config.HEADERS).content
     soup = bs4.BeautifulSoup(html_data, 'lxml')
-    div = soup.find("div", attrs={"class":"entry-content clr", "itemprop" : "text"})
+    div = soup.find("div", attrs={"itemprop" : "text"})
     papers = div.findAll("p")
 
     for paper in papers:
         if " " not in paper.getText():
-            papers_urls[paper.getText()] = paper.find("a").get("href")
+            try:
+                papers_urls[paper.getText()] = paper.find("a").get("href")
+            except AttributeError:
+                pass
 
     return papers_urls
 

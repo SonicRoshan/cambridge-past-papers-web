@@ -2,6 +2,7 @@
 import os
 import sys
 import random
+import traceback
 import shutil
 import zipfile
 from multiprocessing.pool import ThreadPool
@@ -100,7 +101,7 @@ def download_papers(task_id, years_urls, to_filter, error=""):
 
         yield "data:/get_zip/{}/paper_bundle.zip\n\n".format(task_id)
     except Exception as exception:
-        print("error ", exception, file=sys.stderr)
+        print("error ", traceback.format_exc(), file=sys.stderr)
         yield "data:error\n\n"
         return
 
